@@ -1,0 +1,80 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  web:
+    build:
+      context: .
+      dockerfile: web.Dockerfile
+      args:
+        DOTNET_VERSION: ${DOTNET_VERSION}
+        NODE_VERSION: ${NODE_VERSION}
+        FRONTEND_DIR: ${FRONTEND_DIR}
+        FRONTEND_OUT: ${FRONTEND_OUT}
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - dpkeys:/keys
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8470; printf 'GET /api/specialties HTTP/1.1\\r\\nHost: localhost\\r\\nX-Forwarded-Proto: https\\r\\nConnection: close\\r\\n\\r\\n' >&3; head -n1 <&3 | grep -q ' 200 '"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    ports:
+      - "${HTTP_PORT}:${HTTP_PORT}"
+    volumes:
+      - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+
+  llm:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./models:/models:ro
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    ports:
+      - "127.0.0.1:8080:8080"
+
+  noor:
+    build: ./noor-assistant
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      llm:
+        condition: service_started
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  pgdata:
+  dpkeys: 
+

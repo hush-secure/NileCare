@@ -1,0 +1,84 @@
+/* Styles for login, register, doctor profile and the user box in the navbar.
+   Uses only the theme variables, same as App.css. */
+
+.nav-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 8px;
+  padding-left: 12px;
+  border-left: var(--border-width-thin) solid var(--border-default);
+}
+
+.nav-user-name {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-logout {
+  background: transparent;
+  color: var(--text-accent);
+  border: var(--border-width-thin) solid var(--border-accent);
+  border-radius: var(--radius-md-alt);
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  font-weight: var(--font-weight-semibold);
+  transition: background var(--transition-normal);
+}
+
+.nav-logout:hover {
+  background: var(--interactive-ghost-hover);
+}
+
+.role-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.role-option {
+  padding: 12px;
+  background: transparent;
+  color: var(--text-secondary);
+  border: var(--border-width-thin) solid var(--border-default);
+  border-radius: var(--radius-md-alt);
+  font-weight: var(--font-weight-semibold);
+  transition: background var(--transition-normal), border-color var(--transition-normal);
+}
+
+.role-option:hover {
+  background: var(--interactive-ghost-hover);
+}
+
+.role-option.active {
+  background: var(--interactive-ghost-active);
+  color: var(--text-accent);
+  border-color: var(--border-accent);
+}
+
+.check-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: var(--border-width-thin) solid var(--border-default);
+  border-radius: var(--radius-pill);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.check input {
+  width: auto;
+  padding: 0;
+  margin: 0;
+}
